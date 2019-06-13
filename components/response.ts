@@ -38,7 +38,7 @@ export default class ResponseHandler {
         })
     }
 
-    static validation(res:Response, errors:any) {
+    static validation(res:Response, errors:any) {//todo add fieldname in
         if(_.isString(errors)) {
             return res.status(400).json([errors])
         }

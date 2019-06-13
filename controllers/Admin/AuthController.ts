@@ -3,8 +3,7 @@ import db from '../../models/index'
 import jwt from 'jsonwebtoken'
 import Joi from 'joi'
 import bcrypt from 'bcrypt'
-import { ValidationError } from 'sequelize/types';
-
+import response from '../../components/response'
 const router = express.Router()
 
 router.post('/login', async (req, res) => {
@@ -22,15 +21,13 @@ router.post('/login', async (req, res) => {
             }
         })
         if(!admin) {
-            //@ts-ignore
-            return validation(res, null, 'نام کاربری یا رمز عبور اشتباه است')
+            return response.validation(res, null, 'نام کاربری یا رمز عبور اشتباه است')
         }
 
        const isOk = await bcrypt.compare(data.password, admin.password)
 
         if (!isOk) {
-            //@ts-ignore
-            return validation(res, null, 'نام کاربری یا رمز عبور اشتباه است')
+            return response.validation(res, null, 'نام کاربری یا رمز عبور اشتباه است')
         }
 
         delete admin.password
@@ -40,15 +37,13 @@ router.post('/login', async (req, res) => {
         const app_key = "Moz" + (process.env.APP_KEY || 'secret') + "Lorem Admin"
         const token = jwt.sign({data: admin}, app_key)
 
-        //@ts-ignore
-        return success(res, {
+        return response.success(res, {
             user: admin,
             token
         })
     }catch(err) {
         console.log(err)
-        //@ts-ignore
-        return customError(res, 500, 'مشکلی در سمت سرور پیش آمده است', err)
+        return response.customError(res,'مشکلی در سمت سرور پیش آمده است',500, err)
     }
     
 })
