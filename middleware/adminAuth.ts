@@ -9,8 +9,6 @@ export default async (req:Request, res:Response, next:Function) => {
 	) {
 		try {
 			const admin=await AuthHandler.AdminVerify(req.headers.authorization.split(" ")[1])
-			console.log(admin);
-			
 			// if(admin){
 				//@ts-ignore
 				req.user=admin;

@@ -1,48 +1,43 @@
 import express from 'express'
 import db from '../../models/index'
-import jwt from 'jsonwebtoken'
 import Joi from 'joi'
 import bcrypt from 'bcrypt'
 import response from '../../components/response'
+import AuthHandler from '../../middleware/AuthHandler'
 const router = express.Router()
 
 router.post('/login', async (req, res) => {
     try{
         const schema = Joi.object().keys({
-            username: Joi.string().alphanum().label('نام کاربری').required(),
+            username: Joi.string().alphanum().required().label("نام کاربری"),
             password: Joi.string().required().label('رمز عبور')
         })
         
-        const data = await Joi.validate(req.body, schema)
-        
+        const {error, value} = Joi.validate(req.body, schema,{ abortEarly: false })
+        if(error) {
+            return response.validation(res, error)
+        }
         const admin = await db.Admin.findOne({
             where: {
-                username: data.username
+                username: value.username
             }
         })
         if(!admin) {
-            return response.validation(res, null, 'نام کاربری یا رمز عبور اشتباه است')
+            return response.validation(res, 'نام کاربری یا رمز عبور اشتباه است')
         }
 
-       const isOk = await bcrypt.compare(data.password, admin.password)
+       const isOk = await bcrypt.compare(value.password, admin.password)
 
         if (!isOk) {
-            return response.validation(res, null, 'نام کاربری یا رمز عبور اشتباه است')
+            return response.validation(res, 'نام کاربری یا رمز عبور اشتباه است')
         }
-
-        delete admin.password
-        delete admin.reset_token
-
-        
-        const app_key = "Moz" + (process.env.APP_KEY || 'secret') + "Lorem Admin"
-        const token = jwt.sign({data: admin}, app_key)
+        const token =await AuthHandler.AdminGen(admin);
 
         return response.success(res, {
             user: admin,
             token
         })
     }catch(err) {
-        console.log(err)
         return response.customError(res,'مشکلی در سمت سرور پیش آمده است',500, err)
     }
     

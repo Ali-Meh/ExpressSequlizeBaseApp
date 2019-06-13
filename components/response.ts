@@ -38,12 +38,18 @@ export default class ResponseHandler {
         })
     }
 
-    static validation(res:Response, errors:any) {//todo add fieldname in
+    static validation(res:Response, errors:any,field:string="all") {//todo add fieldname in
         if(_.isString(errors)) {
-            return res.status(400).json([errors])
+            return res.status(400).json([{
+                field,
+                message:errors
+            }])
         }
         let data = errors.details || errors
-        return res.status(400).json(_.map(data, 'message'))
+        return res.status(400).json(data.map((e:any)=>{return {
+            message:e.message,
+            field:e.path[0]
+        }}))
     }
 
     static catchError(res:Response, err:any) {
