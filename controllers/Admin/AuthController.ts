@@ -21,13 +21,15 @@ router.post('/login', async (req, res) => {
             }
         })
         if(!admin) {
-            return response.validation(res, null, 'نام کاربری یا رمز عبور اشتباه است')
+            return response.validation(res, 'نام کاربری یا رمز عبور اشتباه است')
         }
-
+        // if(admin.disabled){
+        //     return response.customError(res, 'حساب کاربری شما مسدود شده است با ادمین تمایس بگیرید',401)
+        // }
        const isOk = await bcrypt.compare(data.password, admin.password)
 
         if (!isOk) {
-            return response.validation(res, null, 'نام کاربری یا رمز عبور اشتباه است')
+            return response.validation(res, 'نام کاربری یا رمز عبور اشتباه است')
         }
 
         delete admin.password
